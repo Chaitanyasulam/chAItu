@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+        }
+        .chat-box {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background: #fafafa;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-message {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #e1f5fe;
+            align-self: flex-start;
+        }
+        .chatbot-reply {
+            background-color: #f1f1f1;
+            align-self: flex-end;
+        }
+        form {
+            display: flex;
+            justify-content: space-between;
+        }
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        button {
+            width: 18%;
+            padding: 10px;
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <script src="apps.js"></script>
+    <div class="container">
+        <h1>Chat with our Bot</h1>
+        <div class="chat-box" id="chat-log"></div>
+        <form id="chat-form">
+            <input type="text" id="message" name="message" placeholder="Type your message..." required>
+            <button type="submit" id="send-btn">Send</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('chat-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const userInput = document.getElementById('message').value.trim();
+            if (!userInput) return;
+
+            // Display user message
+            const chatLog = document.getElementById('chat-log');
+            const userMessageElem = document.createElement('div');
+            userMessageElem.classList.add('chat-message', 'user-message');
+            userMessageElem.innerHTML = `<strong>You:</strong> ${userInput}`;
+            chatLog.appendChild(userMessageElem);
+
+            document.getElementById('message').value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userInput })
+                });
+
+                const data = await response.json();
+
+                // Display bot response
+                const botMessageElem = document.createElement('div');
+                botMessageElem.classList.add('chat-message', 'chatbot-reply');
+                botMessageElem.innerHTML = `<strong>Bot:</strong> ${data.chatbotReply}`;
+                chatLog.appendChild(botMessageElem);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
